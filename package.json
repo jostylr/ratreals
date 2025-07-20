@@ -1,0 +1,30 @@
+{
+  "name": "ratreals",
+  "version": "0.1.0",
+  "description": "This package supports representing real numbers as functions that take in a rational interval and either affirm or deny the presence of the real number in the interval. It uses the library ratmath for the rational interval arithmetic. ",
+  "keywords": [
+    "real",
+    "numbers",
+    "rational",
+    "arithmetic"
+  ],
+  "homepage": "https://github.com/jostylr/ratreals#readme",
+  "bugs": {
+    "url": "https://github.com/jostylr/ratreals/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jostylr/ratreals.git"
+  },
+  "license": "MIT",
+  "author": "jostylr",
+  "type": "module",
+  "main": "index.tsx",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {},
+  "dependencies": {
+    "ratmath": "git@github.com:jostylr/ratmath.git"
+  }
+}
