@@ -8,7 +8,7 @@ The intervals of inputs and outputs are inclusive of the endpoints. In particula
 
 There are several properties that a function of the above form must satisfy to be an oracle:
 
-- Separation. Given any prophecy c:d and m contained in c:d and a delta > 0, then at least  one of the following holds true: R(c:m, delta) = 1, R(m:m, delta) =1, or R(m:d, delta)=1.
+- Separation. Given any prophecy c:d and m contained in c:d and a delta > 0, then one of the following holds true: R(c:m, delta) = 1 or R(m:d, delta)=1.
 
 - Disjointness. If c:d is a prophecy and a:b is disjoint from c:d, then there exists a delta such that R(a:b, delta) = 0.
 
@@ -16,8 +16,8 @@ There are several properties that a function of the above form must satisfy to b
 
 - Closed. If for each delta >0, the delta neighborhood (a)_delta contains a prophecy, then for all b, R(a:b) = 1.
 
+From a practical point of view, initiating an oracle should be to give a known Yes interval and be able to use Separation to create smaller intervals. Disjointness and Consistency are just built in. Closed is not really relevant from a computable point of view, it is for proofs. But singletons should definitely be permitted as Yes intervals.
 
-
-These should be established for any given oracle one is working with. . Also, from a practical point of view, the oracles here ought to be limited to those that can actually produce the answer in a finite time. That is, we can only concern ourselves with the computable numbers or, at least, numbers that are computable up to the point that we care about.
+These should be established for any given oracle one is working with. Also, from a practical point of view, the oracles here ought to be limited to those that can actually produce the answer in a finite time. That is, we can only concern ourselves with the computable numbers or, at least, numbers that are computable up to the point that we care about.
 
 This is developed with Bun, but should work in various javascript runtimes.
