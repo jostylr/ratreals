@@ -23,8 +23,16 @@
   "directories": {
     "test": "tests"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
   "dependencies": {
     "ratmath": "git@github.com:jostylr/ratmath.git"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
   }
 }
