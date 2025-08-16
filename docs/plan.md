@@ -4,11 +4,11 @@ This document outlines the action plan for implementing the real number oracle l
 
 ## Core Data Structures and Types
 
-First, we need to define the core data structures that will be used throughout the library. These should be in a file like `src/types.tsx`.
+First, we need to define the core data structures that will be used throughout the library. These should be in a file like `src/types.tsx`. All operations are synchronous and should leverage ratmath types/utilities directly where available.
 
 - **`Rational`**: A type for representing rational numbers, likely as a pair of integers `[numerator, denominator]`.
 - **`RationalInterval`**: A type for representing a rational interval, `[Rational, Rational]`.
-- **`Oracle`**: The core function type: `(ab: RationalInterval, delta: Rational, in: any) => Promise<{ans: boolean, cd: RationalInterval, out: any}>`. The oracle function itself will have a `yes` property of type `RationalInterval`.
+- **`Oracle`**: The core function type: `(ab: RationalInterval, delta: Rational, in: any) => {ans: boolean, cd: RationalInterval, out: any}` (synchronous). The oracle function itself will have a `yes` property of type `RationalInterval`.
 - **`Answer`**: The return type of an oracle call: `{ans: boolean, cd: RationalInterval, out: any}`.
 
 ---
@@ -55,7 +55,7 @@ First, we need to define the core data structures that will be used throughout t
 
 **Documentation**:
 - Explain the underlying principle: shrinking the `yes` intervals of the operands until the operation on the interval is small enough to satisfy the query.
-- Detail the error handling for `divide` when the denominator oracle could be zero.
+- Division-by-zero policy: if denominator is known zero at definition, throw; if denominator `yes` contains zero at definition, warn (via pluggable logger); when producing an interval for a given `delta`, reduce and if zero still present, throw.
 
 **Tests**:
 - `add(fromRational(1), fromRational(2))` should be equivalent to `fromRational(3)`.
