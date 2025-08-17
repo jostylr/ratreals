@@ -21,3 +21,30 @@ From a practical point of view, initiating an oracle should be to give a known Y
 These should be established for any given oracle one is working with. Also, from a practical point of view, the oracles here ought to be limited to those that can actually produce the answer in a finite time. That is, we can only concern ourselves with the computable numbers or, at least, numbers that are computable up to the point that we care about.
 
 This is developed with Bun, but should work in various javascript runtimes.
+
+## Quick Start (sync API)
+
+```ts
+import { fromRational } from './src/functions';
+import { add, divide } from './src/arithmetic';
+import { bisect } from './src/narrowing';
+import { makeRational } from './src/ops';
+
+// Create oracles for 2 and 3
+const two = fromRational(makeRational(2));
+const three = fromRational(makeRational(3));
+
+// Arithmetic behaves like normal math (synchronously)
+const five = add(two, three);
+
+// Narrow an interval to target precision
+const approx = bisect(five, makeRational(0.001));
+// approx is a RationalInterval around 5 with width <= 0.001
+
+// Division semantics:
+// - If denominator is known to be 0 at definition -> throws
+// - If denominator yes-interval contains 0 at definition -> warns via logger
+// - When producing an interval at a given delta, if 0 remains -> throws
+```
+
+Note: Internal interval helpers currently use a minimal numeric fallback; they are structured to be replaced by ratmath’s precise interval/rational operations.

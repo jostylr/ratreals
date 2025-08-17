@@ -1,5 +1,12 @@
 // Minimal interval/rational helpers with simple numeric semantics.
 // Designed to be swappable with ratmath-provided utilities later.
+// Swap points (ratmath):
+// - normalizeInterval(i)
+// - width(i)
+// - containsZero(i)
+// - intersect(a,b)
+// - addIntervals/subIntervals/mulIntervals/divIntervals
+// - midpoint(i)
 
 export type Rational = [number, number];
 export type RationalInterval = [Rational, Rational];
@@ -98,4 +105,3 @@ export function midpoint(i: RationalInterval): number {
   const [lo, hi] = normalizeInterval(i);
   return (toNumber(lo) + toNumber(hi)) / 2;
 }
-
