@@ -1,16 +1,18 @@
 import { type Oracle, type Rational, type RationalInterval } from './types';
-import { midpoint, makeRational, normalizeInterval, width } from './ops';
+import { midpoint, normalizeInterval, width } from './ops';
+import { RationalInterval as RMInterval, Rational } from 'ratmath';
 
 export function bisect(oracle: Oracle, precision: Rational): RationalInterval {
   let current = normalizeInterval(oracle.yes);
-  const targetWidth = Math.abs(precision as unknown as number) || 0; // precision as rational is supported via ops in future
+  const targetWidth = typeof (precision as any) === 'number'
+    ? Math.abs(precision as unknown as number)
+    : Math.abs(Number((precision as unknown as Rational).numerator) / Number((precision as unknown as Rational).denominator));
   let guard = 0;
   while (width(current) > targetWidth && guard++ < 10_000) {
     const m = midpoint(current);
-    const left: RationalInterval = [current[0], makeRational(m)];
-    const right: RationalInterval = [makeRational(m), current[1]];
-    // Prefer the half that intersects with current yes by definition; choose smaller one next
-    // For this scaffold, alternate sides to shrink
+    const left: RationalInterval = new RMInterval(current.low, m);
+    const right: RationalInterval = new RMInterval(m, current.high);
+    // Alternate sides to shrink
     current = guard % 2 === 0 ? left : right;
   }
   return current;
@@ -25,4 +27,3 @@ export function refine(oracle: Oracle, precision: Rational): Oracle {
   fn.yes = refinedYes;
   return fn;
 }
-

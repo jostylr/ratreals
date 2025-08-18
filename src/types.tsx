@@ -1,10 +1,5 @@
-// Public-facing types for oracles, using ratmath types when available.
-// Note: Type-only imports are erased at runtime, so tests can run without ratmath installed.
-
-import type { Rational as RM_Rational, RationalInterval as RM_RationalInterval } from 'ratmath';
-
-export type Rational = RM_Rational | [number, number];
-export type RationalInterval = RM_RationalInterval | [Rational, Rational];
+// Public-facing types for oracles, using ratmath classes directly.
+import { Rational, RationalInterval } from 'ratmath';
 
 export type Answer = {
   ans: boolean;
@@ -16,4 +11,3 @@ export interface Oracle {
   (ab: RationalInterval, delta: Rational, input?: unknown): Answer;
   yes: RationalInterval;
 }
-

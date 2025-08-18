@@ -1,107 +1,59 @@
-// Minimal interval/rational helpers with simple numeric semantics.
-// Designed to be swappable with ratmath-provided utilities later.
-// Swap points (ratmath):
-// - normalizeInterval(i)
-// - width(i)
-// - containsZero(i)
-// - intersect(a,b)
-// - addIntervals/subIntervals/mulIntervals/divIntervals
-// - midpoint(i)
+import { Rational, RationalInterval } from 'ratmath';
 
-export type Rational = [number, number];
-export type RationalInterval = [Rational, Rational];
+export const ZERO: Rational = Rational.zero;
 
-export const ZERO: Rational = [0, 1];
-
-export function makeRational(n: number): Rational {
-  return [n, 1];
+export function makeRational(n: number | string | bigint): Rational {
+  return new Rational(n as any);
 }
 
 export function toNumber(q: Rational): number {
-  const [n, d] = q;
-  return d === 0 ? Number.NaN : n / d;
+  return Number(q.numerator) / Number(q.denominator);
 }
 
 export function normalizeInterval(i: RationalInterval): RationalInterval {
-  const a = toNumber(i[0]);
-  const b = toNumber(i[1]);
-  return a <= b ? i : [i[1], i[0]];
+  // Instances are always normalized in constructor; create a new one to enforce ordering
+  return i instanceof RationalInterval ? i : new RationalInterval((i as any).low, (i as any).high);
 }
 
 export function width(i: RationalInterval): number {
-  const [lo, hi] = normalizeInterval(i);
-  return Math.abs(toNumber(hi) - toNumber(lo));
+  const diff = i.high.subtract(i.low);
+  return Number(diff.numerator) / Number(diff.denominator);
 }
 
 export function containsZero(i: RationalInterval): boolean {
-  const [lo, hi] = normalizeInterval(i);
-  const alo = toNumber(lo);
-  const ahi = toNumber(hi);
-  return Math.min(alo, ahi) <= 0 && Math.max(alo, ahi) >= 0;
+  return i.containsZero();
 }
 
 export function expand(i: RationalInterval, delta: Rational): RationalInterval {
-  const d = Math.abs(toNumber(delta));
-  const [lo, hi] = normalizeInterval(i);
-  const nlo = makeRational(toNumber(lo) - d);
-  const nhi = makeRational(toNumber(hi) + d);
-  return [nlo, nhi];
+  const d = delta instanceof Rational ? delta : new Rational(delta as any);
+  return new RationalInterval(i.low.subtract(d), i.high.add(d));
 }
 
 export function intersect(a: RationalInterval, b: RationalInterval): RationalInterval | null {
-  const [alo, ahi] = normalizeInterval(a);
-  const [blo, bhi] = normalizeInterval(b);
-  const lo = Math.max(toNumber(alo), toNumber(blo));
-  const hi = Math.min(toNumber(ahi), toNumber(bhi));
-  if (lo > hi) return null;
-  return [makeRational(lo), makeRational(hi)];
+  return a.intersection(b);
 }
 
 export function withinDelta(prophecy: RationalInterval, target: RationalInterval, delta: Rational) {
   const expanded = expand(target, delta);
-  const int = intersect(prophecy, expanded);
-  return !!int; // overlap is enough for our simplified semantics
+  return prophecy.intersection(expanded) !== null;
 }
 
-// Interval arithmetic (very naive, numeric)
 export function addIntervals(a: RationalInterval, b: RationalInterval): RationalInterval {
-  const [alo, ahi] = normalizeInterval(a);
-  const [blo, bhi] = normalizeInterval(b);
-  return [makeRational(toNumber(alo) + toNumber(blo)), makeRational(toNumber(ahi) + toNumber(bhi))];
+  return a.add(b) as RationalInterval;
 }
 
 export function subIntervals(a: RationalInterval, b: RationalInterval): RationalInterval {
-  const [alo, ahi] = normalizeInterval(a);
-  const [blo, bhi] = normalizeInterval(b);
-  return [makeRational(toNumber(alo) - toNumber(bhi)), makeRational(toNumber(ahi) - toNumber(blo))];
+  return a.subtract(b) as RationalInterval;
 }
 
 export function mulIntervals(a: RationalInterval, b: RationalInterval): RationalInterval {
-  const [alo, ahi] = normalizeInterval(a);
-  const [blo, bhi] = normalizeInterval(b);
-  const vals = [
-    toNumber(alo) * toNumber(blo),
-    toNumber(alo) * toNumber(bhi),
-    toNumber(ahi) * toNumber(blo),
-    toNumber(ahi) * toNumber(bhi),
-  ];
-  return [makeRational(Math.min(...vals)), makeRational(Math.max(...vals))];
+  return a.multiply(b) as RationalInterval;
 }
 
 export function divIntervals(a: RationalInterval, b: RationalInterval): RationalInterval {
-  // Caller must ensure b does not contain zero.
-  const [alo, ahi] = normalizeInterval(a);
-  const [blo, bhi] = normalizeInterval(b);
-  const vals = [
-    toNumber(alo) / toNumber(blo),
-    toNumber(alo) / toNumber(bhi),
-    toNumber(ahi) / toNumber(blo),
-    toNumber(ahi) / toNumber(bhi),
-  ];
-  return [makeRational(Math.min(...vals)), makeRational(Math.max(...vals))];
+  return a.divide(b) as RationalInterval; // will throw if b contains zero
 }
 
-export function midpoint(i: RationalInterval): number {
-  const [lo, hi] = normalizeInterval(i);
-  return (toNumber(lo) + toNumber(hi)) / 2;
+export function midpoint(i: RationalInterval): Rational {
+  return i.low.add(i.high).divide(new Rational(2));
 }

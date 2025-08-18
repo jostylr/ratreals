@@ -1,36 +1,36 @@
 import { describe, it, expect, mock } from 'bun:test';
 import { add, subtract, multiply, divide } from '../src/arithmetic';
 import { fromRational, fromInterval } from '../src/functions';
-import { makeRational } from '../src/ops';
+import { makeRational, toNumber } from '../src/ops';
+import { RationalInterval } from 'ratmath';
 import { setLogger } from '../src/logger';
 
 describe('arithmetic oracles', () => {
   it('add/subtract/multiply combine yes intervals', () => {
-    const a = fromInterval([makeRational(1), makeRational(2)]);
-    const b = fromInterval([makeRational(3), makeRational(4)]);
+    const a = fromInterval(new RationalInterval(makeRational(1), makeRational(2)) as any);
+    const b = fromInterval(new RationalInterval(makeRational(3), makeRational(4)) as any);
     const s = add(a, b);
-    expect(s.yes[0][0]).toBe(4);
-    expect(s.yes[1][0]).toBe(6);
+    expect(toNumber(s.yes.low)).toBe(4);
+    expect(toNumber(s.yes.high)).toBe(6);
     const d = subtract(b, a);
-    expect(d.yes[0][0]).toBe(1);
-    expect(d.yes[1][0]).toBe(3);
+    expect(toNumber(d.yes.low)).toBe(1);
+    expect(toNumber(d.yes.high)).toBe(3);
     const m = multiply(a, b);
-    expect(m.yes[0][0]).toBe(3);
-    expect(m.yes[1][0]).toBe(8);
+    expect(toNumber(m.yes.low)).toBe(3);
+    expect(toNumber(m.yes.high)).toBe(8);
   });
 
   it('division warns when denom yes contains zero and throws for known zero', () => {
     const warn = mock(() => {});
     setLogger({ warn });
-    const numer = fromInterval([makeRational(1), makeRational(2)]);
+    const numer = fromInterval(new RationalInterval(makeRational(1), makeRational(2)) as any);
     // denom spans zero -> warn
-    const denomWarn = fromInterval([makeRational(-1), makeRational(1)]);
+    const denomWarn = fromInterval(new RationalInterval(makeRational(-1), makeRational(1)) as any);
     const d1 = divide(numer, denomWarn);
     expect(warn).toHaveBeenCalled();
 
     // denom known zero -> throw
-    const denomZero = fromInterval([makeRational(0), makeRational(0)]);
+    const denomZero = fromInterval(new RationalInterval(makeRational(0), makeRational(0)) as any);
     expect(() => divide(numer, denomZero)).toThrowError();
   });
 });
-

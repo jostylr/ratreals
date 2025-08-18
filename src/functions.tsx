@@ -1,13 +1,6 @@
 import { type Oracle, type Rational, type RationalInterval, type Answer } from './types';
-import {
-  ZERO,
-  containsZero,
-  intersect,
-  makeRational,
-  normalizeInterval,
-  toNumber,
-  withinDelta,
-} from './ops';
+import { intersect, normalizeInterval, withinDelta, makeRational } from './ops';
+import { Rational, RationalInterval as RMInterval } from 'ratmath';
 
 function makeOracle(
   yes: RationalInterval,
@@ -24,7 +17,8 @@ function makeOracle(
 }
 
 export function fromRational(q: Rational): Oracle {
-  const yes: RationalInterval = [q, q];
+  const rq = q instanceof Rational ? q : new Rational(q as any);
+  const yes: RationalInterval = new RMInterval(rq, rq);
   return makeOracle(yes, () => yes);
 }
 
@@ -35,17 +29,11 @@ export function fromInterval(i: RationalInterval): Oracle {
 
 export function fromTestFunction(testFn: (i: RationalInterval) => boolean): Oracle {
   // Start with a broad yes interval if not otherwise provided. Here, [-1e9, 1e9].
-  const yes: RationalInterval = [makeRational(-1e9), makeRational(1e9)];
+  const yes: RationalInterval = new RMInterval(makeRational(-1e9), makeRational(1e9));
   return makeOracle(yes, (ab) => {
-    // If test says inside, return ab as a prophecy; otherwise return a disjoint prophecy near ab
     if (testFn(ab)) return ab;
-    const a = toNumber(ab[0]);
-    const b = toNumber(ab[1]);
-    const mid = (a + b) / 2;
-    // Return a tiny interval disjoint from ab to force a No
-    const tiny = 1e-6;
-    const outside: RationalInterval = [makeRational(mid + tiny), makeRational(mid + tiny)];
+    // Return a nearby point outside to force No
+    const outside = new RMInterval(makeRational(1e12), makeRational(1e12));
     return outside;
   });
 }
-
