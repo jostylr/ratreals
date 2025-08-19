@@ -8,10 +8,25 @@ function makeOracle(
   compute: (ab: RationalInterval, delta: Rational) => RationalInterval
 ): Oracle {
   const fn = ((ab: RationalInterval, delta: Rational): Answer => {
-    const prophecy = normalizeInterval(compute(ab, delta));
     const target = normalizeInterval(ab);
-    const ans = !!intersect(prophecy, target) && withinDelta(prophecy, target, delta);
-    return { ans, cd: prophecy };
+    const currentYes = normalizeInterval((fn as Oracle).yes);
+    if (withinDelta(currentYes, target, delta)) {
+      const interYT = intersect(currentYes, target);
+      if (interYT) {
+        return { ans: true, cd: currentYes };
+      }
+      return { ans: false, cd: currentYes };
+    }
+    const prophecy = normalizeInterval(compute(target, delta));
+    const interYY = intersect(prophecy, currentYes);
+    if (interYY) {
+      const refined = normalizeInterval(interYY);
+      (fn as Oracle).yes = refined;
+      const interWithTarget = intersect(refined, target);
+      const ans = !!interWithTarget && withinDelta(refined, target, delta);
+      return { ans, cd: refined };
+    }
+    return { ans: false, cd: currentYes };
   }) as Oracle;
   fn.yes = normalizeInterval(yes);
   return fn;
